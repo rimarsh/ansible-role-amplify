@@ -13,3 +13,30 @@
   file:
     path: '{{ amplify_script_dest_path }}/install.sh'
     state: absent
+
+- name: Create/assign database user for monitoring to db and grant permissions
+  mysql_user:
+    name: "{{ amplify_monitoring_username }}"
+    password: "{{ amplify_monitoring_password }}"
+    host: "{{ mysql_host }}"
+    state: present
+    login_host: "{{ mysql_host }}"
+    login_user: "{{ mysql_root_user }}"
+    login_password: "{{ mysql_root_password }}"
+
+- name: Enable mysql monitoring
+  ini_file:
+    dest: /etc/amplify-agent/agent.conf
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    backup: yes
+  with_items:
+    - { section: "extensions", option: "mysql", value: True }
+    - { section: "mysql", option: "user", value: "{{ amplify_monitoring_username }}" }
+    - { section: "mysql", option: "password", value: "{{ amplify_monitoring_password }}" }
+
+- name: Restart Amplify Agent
+  service:
+    name: amplify-agent
+    state: restarted

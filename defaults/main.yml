@@ -1,0 +1,5 @@
+---
+amplify_script_dest_path: /tmp/
+mysql_host: localhost
+mysql_root_user: root
+amplify_monitoring_username: amplify
